@@ -1,3 +1,12 @@
+/**
+ * Copyright (c) 2015-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
 const fs = require('fs')
 const http = require('http')
 const jsdom = require('jsdom')
@@ -15,9 +24,11 @@ if (process.env.E2E_FILE) {
   const markup = fs.readFileSync(file, 'utf8')
   getMarkup = () => markup
 
+  const pathPrefix = process.env.PUBLIC_URL.replace(/^https?:\/\/[^/]+\/?/, '')
+
   resourceLoader = (resource, callback) => callback(
     null,
-    fs.readFileSync(path.join(path.dirname(file), resource.url.pathname), 'utf8')
+    fs.readFileSync(path.join(path.dirname(file), resource.url.pathname.replace(pathPrefix, '')), 'utf8')
   )
 } else if (process.env.E2E_URL) {
   getMarkup = () => new Promise(resolve => {
@@ -37,7 +48,7 @@ if (process.env.E2E_FILE) {
 
 export default feature => new Promise(async resolve => {
   const markup = await getMarkup()
-  const host = process.env.E2E_URL || 'http://localhost:3000'
+  const host = process.env.E2E_URL || 'http://www.example.org/spa:3000'
   const doc = jsdom.jsdom(markup, {
     features: {
       FetchExternalResources: ['script', 'css'],
